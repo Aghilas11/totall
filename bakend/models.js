@@ -7,6 +7,10 @@ const imgSchema = new mongoose.Schema({
     data: Buffer,
     contentType: String,
   },
+  kilometerage: Number,
+  year: Number,
+  price: Number,
+  fuel: String,
 });
 
 module.exports = ImageModel = mongoose.model("Image", imgSchema);

@@ -33,13 +33,16 @@ const upload = multer({ storage: storage });
 
 app.post("/", upload.single("testImage"), (req, res) => {
   const saveImage = imageModel({
-    name: req.body.name,
     title: req.body.title, // Récupération du titre depuis la requête
     description: req.body.description, // Récupération de la description depuis la requête
     img: {
       data: fs.readFileSync("uploads/" + req.file.filename),
       contentType: "image/png",
     },
+    kilometerage: req.body.kilometerage, // Nouveau champ
+    year: req.body.year, // Nouveau champ
+    price: req.body.price, // Nouveau champ
+    fuel: req.body.fuel,
   });
   saveImage
     .save()
