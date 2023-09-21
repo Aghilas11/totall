@@ -6,6 +6,8 @@ const multer = require("multer");
 const cors = require("cors");
 const port = 5000;
 const fs = require("fs");
+require("dotenv").config();
+
 const imageModel = require("./models");
 app.use(cors());
 
@@ -13,12 +15,12 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 mongoose
-  .connect(
-    "mongodb+srv://aghilaslisa53:Panzer2018@uploadimg.1bbviqr.mongodb.net/uploadImg",
-    { useNewUrlParser: true, useUnifiedTopology: true }
-  )
-  .then(() => console.log("connected successfully"))
-  .catch((err) => console.log("it has an error", err));
+  .connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => console.log("connexion réussie"))
+  .catch((err) => console.log("une erreur est produite", err));
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -33,26 +35,28 @@ const upload = multer({ storage: storage });
 
 app.post("/", upload.single("testImage"), (req, res) => {
   const saveImage = imageModel({
-    title: req.body.title, // Récupération du titre depuis la requête
-    description: req.body.description, // Récupération de la description depuis la requête
+    title: req.body.title,
+    description: req.body.description,
     img: {
       data: fs.readFileSync("uploads/" + req.file.filename),
       contentType: "image/png",
     },
-    kilometerage: req.body.kilometerage, // Nouveau champ
-    year: req.body.year, // Nouveau champ
-    price: req.body.price, // Nouveau champ
+    kilometerage: req.body.kilometerage,
+    year: req.body.year,
+    price: req.body.price,
     fuel: req.body.fuel,
   });
   saveImage
     .save()
     .then(() => {
-      console.log("image is saved");
-      res.send("Image is saved");
+      console.log("image sauvegardé");
+      res.send("Image sauvegardé");
     })
     .catch((err) => {
-      console.log(err, "error has occurred");
-      res.status(500).send("Error occurred while saving image");
+      console.log(err, "une erreur s'est produite");
+      res
+        .status(500)
+        .send("une erreur s'est produite lors du sauvegarde de l'image");
     });
 });
 
@@ -83,14 +87,14 @@ app.put("/:id", async (req, res) => {
   const imageId = req.params.id;
 
   try {
-    // Recherchez l'image par ID dans la base de données
+    // Rechercher l'image par ID dans la base de données
     const imageToUpdate = await imageModel.findById(imageId);
 
     if (!imageToUpdate) {
       return res.status(404).send("Image introuvable");
     }
 
-    // Mettez à jour les propriétés de l'image (description et titre)
+    // Mettre à jour les propriétés de l'image (description et titre)
     if (req.body.title) {
       imageToUpdate.title = req.body.title;
     }
@@ -98,7 +102,7 @@ app.put("/:id", async (req, res) => {
       imageToUpdate.description = req.body.description;
     }
 
-    // Enregistrez la mise à jour de l'image
+    // Enregistrer la mise à jour de l'image
     await imageToUpdate.save();
 
     res.send("Image mise à jour avec succès");
@@ -109,5 +113,5 @@ app.put("/:id", async (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log("server running successfully");
+  console.log("serveur connecté");
 });
